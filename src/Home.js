@@ -4,21 +4,28 @@ import {Row,Col, Button,Card,Form,Modal} from 'react-bootstrap'
 import {motion} from 'framer-motion'
 import { CiBookmark, CiPlay1 ,CiUser   } from "react-icons/ci";
 import { useState ,useEffect } from 'react';
+import {Audio,BallTriangle,Bars,Puff,Rings, ThreeDots,Grid,TailSpin} from 'react-loader-spinner'
 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { GrDisabledOutline } from 'react-icons/gr';
 
 function Home() {
   
   const [flag,setFlag] = useState("events");
 
   const navigation = useNavigate();
-
   const [list,setList] = useState([]);
 
   const [eventList,setEventList] = useState([]);
   const [organizerList,setOrganizerList] = useState([]);
   const [savedEvents,setSavedEvents] = useState([]);
+
+  const [loader,setLoader] = useState(false);
+  const [detailLoader,setDetailLoader] = useState(false);
+  const [organizerLoader,setOrganizerLoader] = useState(false);
+
+
 
   const [detailsModal,setDetailsModal] = useState(false);
   const [currentEventId,setCurrentEventId] = useState("");
@@ -44,7 +51,8 @@ function Home() {
     setDetailsModal(true)
 
     try{
-
+      
+      setDetailLoader(true)
        const response = await axios.post("https://react2-backend.vercel.app/getEvent",{
          id:id
        })
@@ -55,6 +63,7 @@ function Home() {
           orgName:response.data[0].orgName , going:response.data[0].going
         }
        })
+       setDetailLoader(false)
 
     }catch(e){
        
@@ -73,12 +82,16 @@ function Home() {
   const getOranizers = async() => {
 
      try{
-        
+       
+      setOrganizerLoader(true)
+
       const response = await axios.get("https://react2-backend.vercel.app/getOrganizers");
 
       console.log(response.data , "<=====response of organizers")
 
       setOrganizerList(response.data);
+
+      setOrganizerLoader(false)
 
      
 
@@ -101,11 +114,12 @@ function Home() {
   const getEvents = async() => {
          
     try{
-
+        
+        setLoader(true)
         const response = await axios.get("https://react2-backend.vercel.app/getEvents");
         setEventList(response.data);
-        
         console.log(response.data , " <==== getEvnets response")
+        setLoader(false)
         
 
     }catch(e){
@@ -132,21 +146,34 @@ function Home() {
     elements = 
        
          <div>
-          {
-        eventList.map((x)=>{
-          return <Card style={{marginBottom:"15px",padding:"15px"}} >
-            
-            <Card.Body>
-           
-           Event Name - <span style={{fontWeight:"bold"}}></span>{x.name}
-              <p></p>
-              <p> Date- {x.date.slice(0,13).split(" ").join("/") }</p>
-              <p></p>
-              <Button onClick={e=>openModal(x._id)} variant = 'success' style={{backgroundColor:"#550082",width:"30%"}} > Details </Button>
-              </Card.Body>
-          </Card>
-        })
-       }</div>
+            {
+               loader ?  <div style={{width:"100%",height:"auto",display:"flex",justifyContent:"center",marginTop:"30%"}} >
+                <TailSpin
+               height="80"
+               width="80"
+               radius="9"
+               color="green"
+               ariaLabel="loading"
+               
+             />
+               </div> : <>{
+                eventList.map((x)=>{
+                  return <Card style={{marginBottom:"15px",padding:"15px"}} >
+                    
+                    <Card.Body>
+                   
+                       Event Name - <span style={{fontWeight:"bold"}}></span>{x.name}
+                      <p></p>
+                      <p> Date- {x.date.slice(0,13).split(" ").join("/") }</p>
+                      <p></p>
+                      <Button onClick={e=>openModal(x._id)} variant = 'success' style={{backgroundColor:"#550082",width:"30%"}} > Details </Button>
+                      </Card.Body>
+                  </Card>
+                })
+               }</> 
+            }
+       
+       </div>
     
     
 
@@ -154,38 +181,54 @@ function Home() {
 
     case "organizers" :
 
-    elements =<div>
+    elements =<div> 
+
+
+      {organizerLoader ?  <div style={{width:"100%",height:"500px",display:"flex",justifyContent:"center",marginTop:"10%"}} >
+                <TailSpin
+               height="80"
+               width="80"
+               radius="9"
+               color="green"
+               ariaLabel="loading"
+               
+             />
+               </div> : <> {organizerList.map((x)=>{return <Card style={{padding:"15px",marginBottom:"15px"}} >
+
+                    <Card.Body>  <div> Organizer Name - <span style={{fontWeight:"bold"}} >{x.name}</span></div>
+                      <p></p>
+                      {x.desc}
+                      <p></p> 
+                      All Events
+                      <p></p>
+                      <div style={{display:"flex"}} >
+
+                      {
+                          [...x.events].map((x)=>{
+                            return <motion.div
+
+                            whileHover={{scale:"1.2"}}
+                            
+                            style={{width:"180px",padding:"15px",borderRadius:"5px",backgroundColor:"#dedede",marginRight:"15px"}} >
+                              
+                              <span style={{fontWeight:"bold"}} >{x.name}</span>
+                              <p></p>
+                              {x.date.slice(0,13).split(" ").join("/")}
+                            </motion.div>
+
+                      })
+                  }
+
+
+  </div>
+   </Card.Body>
+
+
+</Card>
+
+})}</> }
         
-       {organizerList.map((x)=>{return <Card style={{padding:"15px",marginBottom:"15px"}} >
-
-        <Card.Body>  <div> Organizer Name - <span style={{fontWeight:"bold"}} >{x.name}</span></div>
-          <p></p>
-          {x.desc}
-          <p></p> 
-          All Events
-          <p></p>
-          <div style={{display:"flex"}} >
-          {
-              [...x.events].map((x)=>{
-                return <motion.div
-
-                whileHover={{scale:"1.2"}}
-                
-                style={{width:"180px",padding:"15px",borderRadius:"5px",backgroundColor:"#dedede",marginRight:"15px"}} >
-                  
-                  <span style={{fontWeight:"bold"}} >{x.name}</span>
-                  <p></p>
-                  {x.date.slice(0,13).split(" ").join("/")}
-                </motion.div>
-              })
-          }
-          </div>
-           </Card.Body>
-
-
-       </Card>
-
-       })}  </div>
+        </div>
 
     break;
 
@@ -208,7 +251,7 @@ function Home() {
     <div>
 
        <Header/>
-
+      
        <div  style={{width:"100%",display:"flex",justifyContent:"center"}} >
             <div className='changeWidth' style={{paddingLeft:"55px",paddingRight:"55px"}} >
                 
@@ -366,9 +409,27 @@ function Home() {
           
           <div style={{width:"100%",backgroundColor:"",padding:"15px"}} > 
              
-             <p style={{fontWeight:"bold"}}>{detailModal.name}</p>
-             <p></p>
-             <p style={{fontWeight:"bold"}} >{detailModal.desc}</p>
+
+             {detailLoader? <div style={{width:"100%",height:"auto",display:"flex",justifyContent:"center",marginTop:"5%"}} >
+                <TailSpin
+               height="80"
+               width="80"
+               radius="9"
+               color="green"
+               ariaLabel="loading"
+               
+             />
+               </div>: <>
+
+                  <p style={{fontWeight:"bold"}}>{detailModal.name}</p>
+                  <p></p>
+                  <p style={{fontWeight:"bold"}} >{detailModal.desc}</p>
+
+                  </>
+               
+               
+               }
+            
              
           </div>
          </Modal.Body>

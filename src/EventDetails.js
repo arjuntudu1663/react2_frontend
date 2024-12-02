@@ -3,13 +3,15 @@ import React, { useEffect, useState } from 'react'
 import { useLocation ,useParams} from 'react-router-dom'
 import { Card,Button,Modal,Accordion  } from 'react-bootstrap';
 import { CgProfile } from "react-icons/cg";
+import {TailSpin} from 'react-loader-spinner';
 import axios from 'axios';
 
 const EventDetails = () => {
 
     const [nameForGoing,setNameForGoing] = useState("");
 
-    const [goingModalFlag,setgoingModalFlag] = useState(false)
+    const [goingModalFlag,setgoingModalFlag] = useState(false);
+    const  [detailsLoader,setDetailsLoader] = useState(false)
     
     const [event,setEvent] = useState({
        
@@ -75,6 +77,7 @@ const EventDetails = () => {
 
             try{
                 
+                setDetailsLoader(true)
                 const response = await axios.post("https://react2-backend.vercel.app/getEvent",{
                     id:location.state.eventId
                 });
@@ -92,7 +95,7 @@ const EventDetails = () => {
                 })
                 
                 console.log(event , "<==== current event" )
-
+                setDetailsLoader(false)
                
               
             }catch(e){
@@ -121,8 +124,19 @@ const EventDetails = () => {
               <p></p>
               <Card> <Card.Header>  {event.name}</Card.Header>
                      <p></p>
-                    
-                    <Card.Body>
+
+
+                     {detailsLoader?<div style={{width:"100%",height:"300px",alignItems:"center",display:"flex",marginBottom:"15px",justifyContent:"center",marginTop:"10%"}} >
+                           
+                            <TailSpin
+                        height="80"
+                        width="80"
+                        radius="9"
+                        color="green"
+                        ariaLabel="loading"
+                        
+                        />
+                      </div>: <Card.Body>
                         {event.desc}
                         <p></p>
                         {event.date.slice(0,13).split(" ").join("/")}
@@ -164,6 +178,12 @@ const EventDetails = () => {
                        
                        
                         </Card.Body>
+                      
+
+                     
+                    }
+                    
+                   
                     
                     <Card.Footer>
                         <Button onClick={e=>setgoingModalFlag(true)} style={{backgroundColor:"#550082"}} >Going</Button></Card.Footer>

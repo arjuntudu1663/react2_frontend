@@ -235,7 +235,7 @@ const Admin = () => {
     const getEvents = async() => {
         
       try{
-         const response = await axios.get("http://localhost:5000/getEvents");
+         const response = await axios.get("https://react2-backend.vercel.app/getEvents");
 
          console.log(response.data," <====== response of /getEvents")
          
@@ -257,7 +257,7 @@ const Admin = () => {
        
       try{
           
-         const response = await axios.post("http://localhost:5000/getOrgName",{
+         const response = await axios.post("https://react2-backend.vercel.app/getOrgName",{
             id:location.state.id
          })
         
